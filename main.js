@@ -7,43 +7,28 @@
   var local_prob = [];
 
   function draw_xy(x, y){
-    var canvas = document.getElementById("s"+x+"-"+y);
-    canvas.style.width = 300/L + "px";
-    canvas.style.height = 300/L + "px";
-    canvas.style.left = 250 + 300/L*x + "px";
-    canvas.style.top = 150 + 300/L*y + "px";
-    var ctx = canvas.getContext('2d');
-    ctx.font = "48px serif";
+    var show = document.getElementById("show-range");
+    var ctx = show.getContext('2d');
     if(state[x][y]==1){
       ctx.fillStyle = 'red';
     }else{
       ctx.fillStyle = 'blue';
     }
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    //ctx.fillText(state[x][y], 25, 50);
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(x/L*show.width, y/L*show.height, (x+1)/L*show.width, (y+1)/L*show.height);
   }
 
   function init_state(){
 
     var show = document.getElementById("show-range");
+    var ctx = show.getContext('2d');
+    ctx.clearRect(0, 0, show.width, show.height);
 
-    var L_before = state.length;
-    for(var x=0; x<L_before; x++){
-      for(var y=0; y<L_before; y++){
-        var canvas = document.getElementById("s"+x+"-"+y);
-        canvas.parentNode.removeChild(canvas);
-      }
-    }
-
-    console.log(`create ${L}x${L} canvas`);
+    console.log(`set ${L}x${L} spins`);
 
     state = [];
     for(var x=0; x<L; x++){
       state.push([]);
       for(var y=0; y<L; y++){
-        var canvas = document.createElement("canvas");
-
         var tmp = Math.random();
         if(tmp>=0.5){
           state[x].push(1);
@@ -51,22 +36,20 @@
           state[x].push(-1);
         }
 
-        canvas.setAttribute("class", "spin");
-        canvas.setAttribute("id", "s"+x+"-"+y);
-        canvas.style.position = "absolute";
-
-        var par = document.getElementById("show-range");
-        par.appendChild(canvas);
-
         draw_xy(x, y);
       }
     }
   }
 
   function init(){
-    var show = document.createElement("div");
+    var show = document.createElement("canvas");
     show.setAttribute("class", "show-range");
     show.setAttribute("id", "show-range");
+    show.style.width = 300 + "px";
+    show.style.height = 300 + "px";
+    show.style.left = 250 + "px";
+    show.style.top = 150 + "px";
+    show.style.position = "absolute";
     document.body.appendChild(show);
 
     init_state();
@@ -86,10 +69,10 @@
         around = j*2-4;
         E_now = J*now*around;
         E_after = -E_now;
-        //local_prob[i][j] = Math.exp(-beta*(E_after-E_now));
+        //local_prob[i][j] = Math.exp(-beta*(E_after-E_now)); // Metropolis
         var a = Math.exp(-beta*E_after);
         var b = Math.exp(-beta*E_now);
-        local_prob[i][j] = a/(a+b);
+        local_prob[i][j] = a/(a+b); // heatbath
       }
     }
   }
@@ -113,7 +96,7 @@
         draw_xy(x,y);
       }
     }
-    setTimeout(local_update, 100);
+    setTimeout(local_update, 0);
   }
 
   init();
@@ -134,7 +117,7 @@
 
     L = Number(out_size.value);
     if(L<1) L=1;
-    if(L>100) L=100;
+    //if(L>10000) L=10000;
     out_size.value = L;
     init_state();
 
