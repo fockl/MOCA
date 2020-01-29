@@ -42,6 +42,7 @@
 
         ctx.fillStyle = 'blue';
       }
+      ctx.fill();
     }else{
       ctx.fillRect((x)/L*show.width, (y)/L*show.height, (x+1)/L*show.width, (y+1)/L*show.height);
       if(state[x][y]==1){
@@ -51,7 +52,6 @@
       }
     }
 
-    ctx.fill();
   }
 
   function init_state(){
@@ -230,4 +230,11 @@
       return false;
     }
   };
+
+  var arrow_button = document.getElementById("arrow_change_button");
+  var block_button = document.getElementById("block_change_button");
+  console.log(arrow_button);
+  console.log(block_button);
+  arrow_button.onclick = function(e){arrow_flag = true};
+  block_button.onclick = function(e){arrow_flag = false};
 })();
