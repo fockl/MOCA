@@ -6,15 +6,52 @@
 
   var local_prob = [];
 
+  var arrow_flag = true;
+
   function draw_xy(x, y){
     var show = document.getElementById("show-range");
     var ctx = show.getContext('2d');
-    if(state[x][y]==1){
-      ctx.fillStyle = 'red';
+    var width = show.width;
+    var height = show.height;
+
+    ctx.clearRect((x)/L*width, (y)/L*height, (x+1)/L*width, (y+1)/L*height);
+
+    if(arrow_flag){
+      if(state[x][y]==1){
+        ctx.beginPath();
+        ctx.moveTo((x+0.5)/L*width, y/L*height);
+        ctx.lineTo((x)/L*width, (y+0.5)/L*height);
+        ctx.lineTo((x+0.25)/L*width, (y+0.5)/L*height);
+        ctx.lineTo((x+0.25)/L*width, (y+1.0)/L*height);
+        ctx.lineTo((x+0.75)/L*width, (y+1.0)/L*height);
+        ctx.lineTo((x+0.75)/L*width, (y+0.5)/L*height);
+        ctx.lineTo((x+1.0)/L*width, (y+0.5)/L*height);
+        ctx.closePath();
+
+        ctx.fillStyle = 'red';
+      }else{
+        ctx.beginPath();
+        ctx.moveTo((x+0.5)/L*width, (y+1.0)/L*height);
+        ctx.lineTo((x)/L*width, (y+0.5)/L*height);
+        ctx.lineTo((x+0.25)/L*width, (y+0.5)/L*height);
+        ctx.lineTo((x+0.25)/L*width, (y)/L*height);
+        ctx.lineTo((x+0.75)/L*width, (y)/L*height);
+        ctx.lineTo((x+0.75)/L*width, (y+0.5)/L*height);
+        ctx.lineTo((x+1.0)/L*width, (y+0.5)/L*height);
+        ctx.closePath();
+
+        ctx.fillStyle = 'blue';
+      }
     }else{
-      ctx.fillStyle = 'blue';
+      ctx.fillRect((x)/L*show.width, (y)/L*show.height, (x+1)/L*show.width, (y+1)/L*show.height);
+      if(state[x][y]==1){
+        ctx.fillStyle = 'red';
+      }else{
+        ctx.fillStyle = 'blue';
+      }
     }
-    ctx.fillRect(x/L*show.width, y/L*show.height, (x+1)/L*show.width, (y+1)/L*show.height);
+
+    ctx.fill();
   }
 
   function init_state(){
@@ -144,12 +181,17 @@
   function onKeyUp(){
     console.log("onKeyUp");
     if(isNaN(output.value)) return;
+    dot_flag = false;
+    if(output.value.length>0){
+      if(output.value[output.value.length-1]==='.') dot_flag = true;
+    }
     value = Number(output.value);
     if(value<0){
       value = 0;
     }else if(value>1){
       value = 1;
     }
+    if(dot_flag) value += '.';
     set_value();
   }
 
