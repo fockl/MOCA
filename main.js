@@ -1,12 +1,111 @@
+//import {Ising} from "./Ising.js";
+
+/*class Ising{
+  constructor(L, J, beta){
+    this.J = J;
+
+    this.local_prob = [];
+    for(var i=0; i<2; ++i){
+      this.local_prob.push([]);
+      for(var j=0; j<5; ++j){
+        this.local_prob[i].push(1);
+      }
+    }
+    this.update_L(L);
+    this.update_beta(beta);
+    return;
+  }
+
+  update_L(L){
+    this.L = L;
+    this.state = [];
+    for(let x=0; x<L; ++x){
+      this.state.push([]);
+      for(let y=0; y<L; ++y){
+        let tmp = Math.random();
+        if(tmp>=0.5) this.state[x].push(-1);
+        else         this.state[x].push(1);
+      }
+    }
+    return;
+  }
+
+  update_beta(beta){
+    this.beta = beta;
+    for(let i=0; i<2; ++i){
+      for(let j=0; j<5; ++j){
+        let now = i*2-1;
+        let around = j*2-4;
+        let E_now = this.J*now*around;
+        let E_after = -E_now;
+        let a = Math.exp(-beta*E_after);
+        let b = Math.exp(-beta*E_now);
+        this.local_prob[i][j] = a/(a+b);
+      }
+    }
+    return;
+  }
+
+  local_update_local(x, y){
+    var around = Math.round((this.state[(x+1)%this.L][y]+this.state[(x-1+this.L)%this.L][y]+this.state[x][(y+1)%this.L]+this.state[x][(y-1+this.L)%this.L]));
+    var around_index = (around+4)/2;
+    var now_index = (Math.round(this.state[x][y]+1))/2;
+    if(Math.random()<this.local_prob[now_index][around_index]){
+      this.state[x][y] *= -1;
+    }
+    return;
+  }
+
+  get_state(x, y){
+    return (this.state[x][y]+1)*90;
+  }
+}*/
+
+
 (function(){
-  var L = 5;
+  let L = 5;
+  let beta = 0.0;
+  let Model;
+  let arrow_flag = true;
 
-  var state = []
-  const J = -1;
+  function calc_posx(x, y, theta){
+    return x*Math.cos(theta) + y*Math.sin(theta);
+  }
 
-  var local_prob = [];
+  function calc_posy(x, y, theta){
+    return -x*Math.sin(theta) + y*Math.cos(theta);
+  }
 
-  var arrow_flag = true;
+  function draw_arrow(ctx, x, y, width, height, theta_orig){
+    let ratiox = width/L;
+    let ratioy = height/L;
+    let shiftx = x+0.5;
+    let shifty = y+0.5;
+    let theta = Math.PI * theta_orig/180.0;
+    let tmpx = calc_posx(0.0, -0.5, theta);
+    let tmpy = calc_posy(0.0, -0.5, theta);
+    ctx.beginPath();
+    ctx.moveTo((tmpx+shiftx)*ratiox, (tmpy+shifty)*ratioy);
+    tmpx = calc_posx(-0.5, 0.0, theta);
+    tmpy = calc_posy(-0.5, 0.0, theta);
+    ctx.lineTo((tmpx+shiftx)*ratiox, (tmpy+shifty)*ratioy);
+    tmpx = calc_posx(-0.25, 0.0, theta);
+    tmpy = calc_posy(-0.25, 0.0, theta);
+    ctx.lineTo((tmpx+shiftx)*ratiox, (tmpy+shifty)*ratioy);
+    tmpx = calc_posx(-0.25, 0.5, theta);
+    tmpy = calc_posy(-0.25, 0.5, theta);
+    ctx.lineTo((tmpx+shiftx)*ratiox, (tmpy+shifty)*ratioy);
+    tmpx = calc_posx(0.25, 0.5, theta);
+    tmpy = calc_posy(0.25, 0.5, theta);
+    ctx.lineTo((tmpx+shiftx)*ratiox, (tmpy+shifty)*ratioy);
+    tmpx = calc_posx(0.25, 0.0, theta);
+    tmpy = calc_posy(0.25, 0.0, theta);
+    ctx.lineTo((tmpx+shiftx)*ratiox, (tmpy+shifty)*ratioy);
+    tmpx = calc_posx(0.5, 0.0, theta);
+    tmpy = calc_posy(0.5, 0.0, theta);
+    ctx.lineTo((tmpx+shiftx)*ratiox, (tmpy+shifty)*ratioy);
+    ctx.closePath();
+  }
 
   function draw_xy(x, y){
     var show = document.getElementById("show-range");
@@ -16,40 +115,15 @@
 
     ctx.clearRect((x)/L*width, (y)/L*height, (x+1)/L*width, (y+1)/L*height);
 
+    const theta = Model.get_state(x, y);
+
     if(arrow_flag){
-      if(state[x][y]==1){
-        ctx.beginPath();
-        ctx.moveTo((x+0.5)/L*width, y/L*height);
-        ctx.lineTo((x)/L*width, (y+0.5)/L*height);
-        ctx.lineTo((x+0.25)/L*width, (y+0.5)/L*height);
-        ctx.lineTo((x+0.25)/L*width, (y+1.0)/L*height);
-        ctx.lineTo((x+0.75)/L*width, (y+1.0)/L*height);
-        ctx.lineTo((x+0.75)/L*width, (y+0.5)/L*height);
-        ctx.lineTo((x+1.0)/L*width, (y+0.5)/L*height);
-        ctx.closePath();
-
-        ctx.fillStyle = 'red';
-      }else{
-        ctx.beginPath();
-        ctx.moveTo((x+0.5)/L*width, (y+1.0)/L*height);
-        ctx.lineTo((x)/L*width, (y+0.5)/L*height);
-        ctx.lineTo((x+0.25)/L*width, (y+0.5)/L*height);
-        ctx.lineTo((x+0.25)/L*width, (y)/L*height);
-        ctx.lineTo((x+0.75)/L*width, (y)/L*height);
-        ctx.lineTo((x+0.75)/L*width, (y+0.5)/L*height);
-        ctx.lineTo((x+1.0)/L*width, (y+0.5)/L*height);
-        ctx.closePath();
-
-        ctx.fillStyle = 'blue';
-      }
+      draw_arrow(ctx, x, y, width, height, theta);
+      ctx.fillStyle = `hsl(${theta}, 100%, 50%)`;
       ctx.fill();
     }else{
       ctx.fillRect((x)/L*show.width, (y)/L*show.height, (x+1)/L*show.width, (y+1)/L*show.height);
-      if(state[x][y]==1){
-        ctx.fillStyle = 'red';
-      }else{
-        ctx.fillStyle = 'blue';
-      }
+      ctx.fillStyle = `hsl(${theta}, 100%, 50%)`;
     }
 
   }
@@ -62,74 +136,25 @@
 
     console.log(`set ${L}x${L} spins`);
 
-    state = [];
-    for(var x=0; x<L; x++){
-      state.push([]);
-      for(var y=0; y<L; y++){
-        var tmp = Math.random();
-        if(tmp>=0.5){
-          state[x].push(1);
-        }else{
-          state[x].push(-1);
-        }
-
-        draw_xy(x, y);
+    for(let x=0; x<L; ++x){
+      for(let y=0; y<L; ++y){
+        draw_xy(x,y);
       }
     }
+
+    return;
   }
 
   function init(){
-    var show = document.createElement("canvas");
-    show.setAttribute("class", "show-range");
-    show.setAttribute("id", "show-range");
-    show.style.width = 300 + "px";
-    show.style.height = 300 + "px";
-    show.style.left = 250 + "px";
-    show.style.top = 150 + "px";
-    show.style.position = "absolute";
-    document.body.appendChild(show);
-
+    Model = new Ising(L,-1,0);
+    //Model = new XY(L,-1,0);
     init_state();
-
-    for(var i=0; i<2; ++i){
-      local_prob.push([]);
-      for(var j=0; j<5; ++j){
-        local_prob[i].push(1);
-      }
-    }
-  }
-
-  function local_prob_update(beta){
-    for(var i=0; i<2; ++i){
-      for(var j=0; j<5; ++j){
-        now = i*2-1;
-        around = j*2-4;
-        E_now = J*now*around;
-        E_after = -E_now;
-        //local_prob[i][j] = Math.exp(-beta*(E_after-E_now)); // Metropolis
-        var a = Math.exp(-beta*E_after);
-        var b = Math.exp(-beta*E_now);
-        local_prob[i][j] = a/(a+b); // heatbath
-      }
-    }
-  }
-
-  function local_update_local(x, y){
-    var around = state[(x+1)%L][y]+state[(x-1+L)%L][y]+state[x][(y+1)%L]+state[x][(y-1+L)%L];
-    var around_index = (around+4)/2;
-    var now_index = (state[x][y]+1)/2;
-    if(Math.random()<local_prob[now_index][around_index]){
-      state[x][y] *= -1;
-    }else{
-      //console.log("rejected");
-    }
   }
 
   function local_update(){
-    //console.log("local_update() start");
     for(var x=0; x<L; ++x){
       for(var y=0; y<L; ++y){
-        local_update_local(x, y);
+        Model.local_update_local(x, y);
         draw_xy(x,y);
       }
     }
@@ -137,7 +162,6 @@
   }
 
   init();
-
   local_update();
 
   var out_size = document.getElementById("sizeo");
@@ -156,6 +180,7 @@
     if(L<1) L=1;
     //if(L>10000) L=10000;
     out_size.value = L;
+    Model.update_L(L);
     init_state();
 
     resizing.innerHTML = "";
@@ -173,7 +198,8 @@
   var set_value = function(){
     input.style.left = (value*slider.clientWidth - input.clientWidth/2) + 'px';
     output.value = value;
-    local_prob_update(value);
+    Model.update_beta(value);
+    beta = value;
   };
   set_value();
 
@@ -237,4 +263,13 @@
   console.log(block_button);
   arrow_button.onclick = function(e){arrow_flag = true};
   block_button.onclick = function(e){arrow_flag = false};
+
+  document.getElementById("Ising_button").onclick = function(e){
+    delete Model;
+    Model = new Ising(L,-1,beta);
+  };
+  document.getElementById("XY_button").onclick = function(e){
+    delete Model;
+    Model = new XY(L,-1,beta);
+  };
 })();
