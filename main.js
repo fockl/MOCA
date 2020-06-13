@@ -66,6 +66,7 @@
   let L = 5;
   let beta = 0.0;
   let Model;
+  let Update;
   let arrow_flag = true;
 
   function calc_posx(x, y, theta){
@@ -148,6 +149,7 @@
   function init(){
     Model = new Ising(L,-1,0);
     //Model = new XY(L,-1,0);
+    Update = "Local";
     init_state();
   }
 
@@ -158,11 +160,34 @@
         draw_xy(x,y);
       }
     }
-    setTimeout(local_update, 0);
+    //setTimeout(local_update, 0);
+  }
+
+  function Wolff_update(){
+    var x = Math.floor(Math.random()*L);
+    var y = Math.floor(Math.random()*L);
+    Model.Wolff_update(x, y);
+    for(var x=0; x<L; ++x){
+      for(var y=0; y<L; ++y){
+        draw_xy(x,y);
+      }
+    }
+    //setTimeout(Wolff_update, 0);
+  }
+
+  function update(){
+    if(Update == "Local"){
+      local_update();
+    }else if(Update == "Wolff"){
+      Wolff_update();
+    }
+    setTimeout(update, 0);
   }
 
   init();
-  local_update();
+  //local_update();
+  //Wolff_update();
+  update();
 
   var out_size = document.getElementById("sizeo");
   out_size.value = L;
@@ -271,5 +296,13 @@
   document.getElementById("XY_button").onclick = function(e){
     delete Model;
     Model = new XY(L,-1,beta);
+  };
+  document.getElementById("local_update_button").onclick = function(e){
+    delete Update;
+    Update = "Local";
+  };
+  document.getElementById("Wolff_update_button").onclick = function(e){
+    delete Update;
+    Update = "Wolff";
   };
 })();

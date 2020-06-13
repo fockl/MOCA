@@ -1,9 +1,9 @@
 canvas{
 }
 .show-range{
+  position: absolute;
   width: 300px;
   height: 300px;
-  position: absolute;
   top: 150px;
   left: 250px;
 }
