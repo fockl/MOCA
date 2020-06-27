@@ -5,6 +5,9 @@ class XY{
 
     this.update_L(L);
     this.update_beta(beta);
+
+    this.target_x = 0;
+    this.target_y = 0;
     return;
   }
 
@@ -57,13 +60,33 @@ class XY{
     return;
   }
 
+  local_update(){
+    var x = this.target_x;
+    var y = this.target_y;
+    x %= this.L;
+    y %= this.L;
+    this.local_update_local(x,y);
+    this.target_x += 1;
+    this.target_y += Math.floor(this.target_x/this.L);
+    this.target_x %= this.L;
+    this.target_y %= this.L;
+    return {x:x,y:y}
+  }
+
   get_state(x, y){
     return this.state[x][y];
   }
 
-  Wolff_update_inner(x, y, base_theta, base_x, base_y){
+  get_all_states(){
+    return this.state;
+  }
+
+  Wolff_update_inner(x, y, base_theta, base_x, base_y, xs, ys){
     if(this.Wolff_Add_flag[x][y]) return;
     this.Wolff_Add_flag[x][y] = true;
+
+    xs.push(x);
+    ys.push(y);
 
     var orig_spin = this.state[x][y];
 
@@ -87,30 +110,45 @@ class XY{
     var down_inner  = Math.cos(down*Math.PI/180.0)*base_x  + Math.sin(down*Math.PI/180.0)*base_y;
 
     if(Math.random()<1-Math.exp(2*this.beta*this.J*right_inner*orig_spin_inner)){
-      this.Wolff_update_inner((x+1)%this.L, y, base_theta, base_x, base_y);
+      this.Wolff_update_inner((x+1)%this.L, y, base_theta, base_x, base_y, xs, ys);
     }
     if(Math.random()<1-Math.exp(2*this.beta*this.J*left_inner*orig_spin_inner)){
-      this.Wolff_update_inner((x-1+this.L)%this.L, y, base_theta, base_x, base_y);
+      this.Wolff_update_inner((x-1+this.L)%this.L, y, base_theta, base_x, base_y, xs, ys);
     }
     if(Math.random()<1-Math.exp(2*this.beta*this.J*up_inner*orig_spin_inner)){
-      this.Wolff_update_inner(x, (y+1)%this.L, base_theta, base_x, base_y);
+      this.Wolff_update_inner(x, (y+1)%this.L, base_theta, base_x, base_y, xs, ys);
     }
     if(Math.random()<1-Math.exp(2*this.beta*this.J*down_inner*orig_spin_inner)){
-      this.Wolff_update_inner(x, (y-1+this.L)%this.L, base_theta, base_x, base_y);
+      this.Wolff_update_inner(x, (y-1+this.L)%this.L, base_theta, base_x, base_y, xs, ys);
     }
   }
 
   Wolff_update(x, y){
-    for(var i=0; i<this.L; ++i){
-      for(var j=0; j<this.L; ++j){
-        this.Wolff_Add_flag[i][j] = false;
-      }
-    }
     var base_theta = Math.random()*360.0;
     var base_x = Math.cos(base_theta*Math.PI/180.0);
     var base_y = Math.sin(base_theta*Math.PI/180.0);
 
-    this.Wolff_update_inner(x, y, base_theta, base_x, base_y);
+    var xs = [];
+    var ys = [];
+
+    this.Wolff_update_inner(x, y, base_theta, base_x, base_y, xs, ys);
+
+    for(var i=0; i<xs.length; ++i){
+      this.Wolff_Add_flag[xs[i]][ys[i]] = false;
+    }
+
+    return {xs:xs, ys:ys};
+  }
+
+  Event_chain_update(){
+    right = this.state[(this.target_x+1)%this.L][this.target_y];
+    left = this.state[(this.target_x-1+this.L)%this.L][this.target_y];
+    up = this.state[this.target_x][(this.target_y+1)%this.L];
+    down = this.state[this.target_x][(this.target_y-1+this.L)%this.L];
+
+
+
+    return {x:this.target_x, y:this.target_y};
   }
 }
 

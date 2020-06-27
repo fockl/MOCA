@@ -1,73 +1,15 @@
-//import {Ising} from "./Ising.js";
-
-/*class Ising{
-  constructor(L, J, beta){
-    this.J = J;
-
-    this.local_prob = [];
-    for(var i=0; i<2; ++i){
-      this.local_prob.push([]);
-      for(var j=0; j<5; ++j){
-        this.local_prob[i].push(1);
-      }
-    }
-    this.update_L(L);
-    this.update_beta(beta);
-    return;
-  }
-
-  update_L(L){
-    this.L = L;
-    this.state = [];
-    for(let x=0; x<L; ++x){
-      this.state.push([]);
-      for(let y=0; y<L; ++y){
-        let tmp = Math.random();
-        if(tmp>=0.5) this.state[x].push(-1);
-        else         this.state[x].push(1);
-      }
-    }
-    return;
-  }
-
-  update_beta(beta){
-    this.beta = beta;
-    for(let i=0; i<2; ++i){
-      for(let j=0; j<5; ++j){
-        let now = i*2-1;
-        let around = j*2-4;
-        let E_now = this.J*now*around;
-        let E_after = -E_now;
-        let a = Math.exp(-beta*E_after);
-        let b = Math.exp(-beta*E_now);
-        this.local_prob[i][j] = a/(a+b);
-      }
-    }
-    return;
-  }
-
-  local_update_local(x, y){
-    var around = Math.round((this.state[(x+1)%this.L][y]+this.state[(x-1+this.L)%this.L][y]+this.state[x][(y+1)%this.L]+this.state[x][(y-1+this.L)%this.L]));
-    var around_index = (around+4)/2;
-    var now_index = (Math.round(this.state[x][y]+1))/2;
-    if(Math.random()<this.local_prob[now_index][around_index]){
-      this.state[x][y] *= -1;
-    }
-    return;
-  }
-
-  get_state(x, y){
-    return (this.state[x][y]+1)*90;
-  }
-}*/
-
-
 (function(){
   let L = 5;
   let beta = 0.0;
   let Model;
   let Update;
   let arrow_flag = true;
+
+  var requestAnimationFrame = window.requestAnimationFrame || 
+　　　　　　　　　　　　　　　　　window.mozRequestAnimationFrame ||
+                            　window.webkitRequestAnimationFrame || 
+　　　　　　　　　　　　　　　　　window.msRequestAnimationFrame;
+  window.requestAnimationFrame = requestAnimationFrame;
 
   function calc_posx(x, y, theta){
     return x*Math.cos(theta) + y*Math.sin(theta);
@@ -109,27 +51,27 @@
   }
 
   function draw_xy(x, y){
+    const theta = Model.get_state(x, y);
+
     var show = document.getElementById("show-range");
     var ctx = show.getContext('2d');
     var width = show.width;
     var height = show.height;
 
-    ctx.clearRect((x)/L*width, (y)/L*height, (x+1)/L*width, (y+1)/L*height);
-
-    const theta = Model.get_state(x, y);
+    ctx.clearRect((x)/L*width, (y)/L*height, (1)/L*width, (1)/L*height);
 
     if(arrow_flag){
       draw_arrow(ctx, x, y, width, height, theta);
-      ctx.fillStyle = `hsl(${theta}, 100%, 50%)`;
-      ctx.fill();
     }else{
-      ctx.fillRect((x)/L*show.width, (y)/L*show.height, (x+1)/L*show.width, (y+1)/L*show.height);
-      ctx.fillStyle = `hsl(${theta}, 100%, 50%)`;
+      ctx.fillRect((x)/L*width, (y)/L*height, (1)/L*width, (1)/L*height);
     }
-
+    ctx.fillStyle = `hsl(${theta}, 100%, 50%)`;
+    ctx.fill();
   }
 
   function init_state(){
+    this.prev_state = Model.get_all_states();
+    console.log(this.prev_state);
 
     var show = document.getElementById("show-range");
     var ctx = show.getContext('2d');
@@ -157,22 +99,45 @@
     for(var x=0; x<L; ++x){
       for(var y=0; y<L; ++y){
         Model.local_update_local(x, y);
-        draw_xy(x,y);
+
+        if(this.prev_state[x][y]!=Model.get_state(x, y)){
+          draw_xy(x,y);
+        }
+        this.prev_state[x][y] = Model.get_state(x, y);
       }
     }
-    //setTimeout(local_update, 0);
+    /* Too slow
+    var {x,y} = Model.local_update();
+    if(this.prev_state[x][y]!=Model.get_state(x,y)){
+      draw_xy(x, y);
+    }
+    this.prev_state[x][y] = Model.get_state(x,y);
+    */
   }
 
   function Wolff_update(){
-    var x = Math.floor(Math.random()*L);
-    var y = Math.floor(Math.random()*L);
-    Model.Wolff_update(x, y);
-    for(var x=0; x<L; ++x){
-      for(var y=0; y<L; ++y){
-        draw_xy(x,y);
-      }
+    var xs = [];
+    var ys = [];
+
+    while(xs.length<=L){
+      var x = Math.floor(Math.random()*L);
+      var y = Math.floor(Math.random()*L);
+      var {xs:xs_tmp, ys:ys_tmp} = Model.Wolff_update(x, y);
+      xs = xs.concat(xs_tmp);
+      ys = ys.concat(ys_tmp);
     }
-    //setTimeout(Wolff_update, 0);
+
+    for(var i=0; i<xs.length; ++i){
+      if(this.prev_state[xs[i]][ys[i]]!=Model.get_state(xs[i], ys[i])){
+        draw_xy(xs[i], ys[i]);
+      }
+      this.prev_state[xs[i]][ys[i]] = Model.get_state(xs[i], ys[i]);
+    }
+  }
+
+  function Event_chain_update(){
+    var {x, y} = Model.Event_chain_update();
+    draw_xy(x,y);
   }
 
   function update(){
@@ -180,13 +145,13 @@
       local_update();
     }else if(Update == "Wolff"){
       Wolff_update();
+    }else if(Update == "Event-chain"){
+      Event_chain_update();
     }
-    setTimeout(update, 0);
+    window.requestAnimationFrame(update);
   }
 
   init();
-  //local_update();
-  //Wolff_update();
   update();
 
   var out_size = document.getElementById("sizeo");
@@ -286,8 +251,24 @@
   var block_button = document.getElementById("block_change_button");
   console.log(arrow_button);
   console.log(block_button);
-  arrow_button.onclick = function(e){arrow_flag = true};
-  block_button.onclick = function(e){arrow_flag = false};
+  arrow_button.onclick = function(e){
+    arrow_flag = true;
+    for(var x=0; x<this.L; ++x){
+      for(var y=0; y<this.L; ++y){
+        draw_xy(x,y);
+        this.prev_state[x][y] = Model.get_state(x, y);
+      }
+    }
+  };
+  block_button.onclick = function(e){
+    arrow_flag = false;
+    for(var x=0; x<this.L; ++x){
+      for(var y=0; y<this.L; ++y){
+        draw_xy(x,y);
+        this.prev_state[x][y] = Model.get_state(x, y);
+      }
+    }
+  };
 
   document.getElementById("Ising_button").onclick = function(e){
     delete Model;
@@ -304,5 +285,9 @@
   document.getElementById("Wolff_update_button").onclick = function(e){
     delete Update;
     Update = "Wolff";
+  };
+  document.getElementById("Event-chain_update_button").onclick = function(e){
+    delete Update;
+    Update = "Event-chain";
   };
 })();

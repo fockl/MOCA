@@ -12,6 +12,9 @@ class Ising{
     }
     this.update_L(L);
     this.update_beta(beta);
+
+    this.target_x = 0;
+    this.target_y = 0;
     return;
   }
 
@@ -62,14 +65,41 @@ class Ising{
     return;
   }
 
+  local_update(){
+    var x = this.target_x;
+    var y = this.target_y;
+    x %= this.L;
+    y %= this.L;
+    this.local_update_local(x,y);
+    this.target_x += 1;
+    this.target_y += Math.floor(this.target_x/this.L);
+    this.target_x %= this.L;
+    this.target_y %= this.L;
+    return {x:x,y:y}
+  }
+
   get_state(x, y){
     return (this.state[x][y]+1)*90;
   }
 
-  Wolff_update_inner(x, y, orig_spin){
+  get_all_states(){
+    var tmp = [];
+    for(var x=0; x<this.L; ++x){
+      tmp.push([]);
+      for(var y=0; y<this.L; ++y){
+        tmp[x].push((this.state[x][y]+1)*90);
+      }
+    }
+    return tmp;
+  }
+
+  Wolff_update_inner(x, y, orig_spin, xs, ys){
     if(this.Wolff_Add_flag[x][y]) return;
     this.Wolff_Add_flag[x][y] = true;
     this.state[x][y] *= -1;
+
+    xs.push(x);
+    ys.push(y);
 
     var right = this.state[(x+1)%this.L][y];
     var left  = this.state[(x-1+this.L)%this.L][y];
@@ -77,30 +107,32 @@ class Ising{
     var down  = this.state[x][(y-1+this.L)%this.L];
 
     if(Math.random()<1-Math.exp(2*this.beta*this.J*right*orig_spin)){
-      this.Wolff_update_inner((x+1)%this.L, y, orig_spin);
+      this.Wolff_update_inner((x+1)%this.L, y, orig_spin, xs, ys);
     }
     if(Math.random()<1-Math.exp(2*this.beta*this.J*left*orig_spin)){
-      this.Wolff_update_inner((x-1+this.L)%this.L, y, orig_spin);
+      this.Wolff_update_inner((x-1+this.L)%this.L, y, orig_spin, xs, ys);
     }
     if(Math.random()<1-Math.exp(2*this.beta*this.J*up*orig_spin)){
-      this.Wolff_update_inner(x, (y+1)%this.L, orig_spin);
+      this.Wolff_update_inner(x, (y+1)%this.L, orig_spin, xs, ys);
     }
     if(Math.random()<1-Math.exp(2*this.beta*this.J*down*orig_spin)){
-      this.Wolff_update_inner(x, (y-1+this.L)%this.L, orig_spin);
+      this.Wolff_update_inner(x, (y-1+this.L)%this.L, orig_spin, xs, ys);
     }
   }
 
   Wolff_update(x, y){
-    for(var i=0; i<this.L; ++i){
-      for(var j=0; j<this.L; ++j){
-        this.Wolff_Add_flag[i][j] = false;
-      }
-    }
     var orig_spin = this.state[x][y];
 
-    this.Wolff_update_inner(x, y, orig_spin);
+    var xs = [];
+    var ys = [];
 
-    return;
+    this.Wolff_update_inner(x, y, orig_spin, xs, ys);
+
+    for(var i=0; i<xs.length; ++i){
+      this.Wolff_Add_flag[xs[i]][ys[i]] = false;
+    }
+
+    return {xs:xs, ys:ys};
   }
 }
 
