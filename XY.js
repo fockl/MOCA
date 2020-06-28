@@ -209,8 +209,8 @@ class XY{
   }
 
   Event_chain_update(){
-    var pos_x = this.target_x;
-    var pos_y = this.target_y;
+    var pos_x = this.target_x%this.L;
+    var pos_y = this.target_y%this.L;
     var pos_state = this.state[pos_x][pos_y];
     var right = this.calc_dtheta_Event_chain(pos_state-this.state[(pos_x+1)%this.L][pos_y]);
     var left = this.calc_dtheta_Event_chain(pos_state-this.state[(pos_x-1+this.L)%this.L][pos_y]);

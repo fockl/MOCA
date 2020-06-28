@@ -1,9 +1,10 @@
 (function(){
-  let L = 5;
-  let beta = 1.0E-3;
-  let Model;
-  let Update;
-  let arrow_flag = true;
+  var L = 5;
+  var beta = 1.0E-3;
+  var Model;
+  var Update;
+  var arrow_flag = true;
+  var prev_state;
 
   var requestAnimationFrame = window.requestAnimationFrame || 
 　　　　　　　　　　　　　　　　　window.mozRequestAnimationFrame ||
@@ -20,7 +21,6 @@
   }
 
   function draw_arrow(ctx, x, y, width, height, theta_orig){
-    console.log("draw_arrow start");
     let ratiox = width/L;
     let ratioy = height/L;
     let shiftx = x+0.5;
@@ -87,7 +87,7 @@
           ctx.fillStyle = `hsl(${theta}, 100%, 50%)`;
           draw_arrow(ctx, x, y, width, height, theta);
           ctx.fill();
-          this.prev_state[x][y] = theta;
+          prev_state[x][y] = theta;
         }
       }
     }else{
@@ -99,23 +99,18 @@
           ctx.fillRect(x/L*width, y/L*height, 1/L*width, 1/L*height);
           ctx.closePath();
           ctx.fill();
-          this.prev_state[x][y] = theta;
+          prev_state[x][y] = theta;
         }
       }
     }
   }
 
   function init_state(){
-    this.prev_state = Model.get_all_states();
-    //console.log(this.prev_state);
-
-    var show = document.getElementById("show-range");
-    var ctx = show.getContext('2d');
-    ctx.clearRect(0, 0, show.width, show.height);
-
-    console.log(`set ${L}x${L} spins`);
-
+    prev_state = Model.get_all_states();
+    //console.log(prev_state);
+    
     redraw_all();
+    console.log(`set ${L}x${L} spins`);
 
     return;
   }
@@ -132,18 +127,19 @@
       for(var y=0; y<L; ++y){
         Model.local_update_local(x, y);
 
-        if(this.prev_state[x][y]!=Model.get_state(x, y)){
+        if(prev_state[x][y]!=Model.get_state(x, y)){
           draw_xy(x,y);
         }
-        this.prev_state[x][y] = Model.get_state(x, y);
+        //console.log(x,y,prev_state[x][y], Model.get_state(x,y));
+        prev_state[x][y] = Model.get_state(x, y);
       }
     }
     /* Too slow
     var {x,y} = Model.local_update();
-    if(this.prev_state[x][y]!=Model.get_state(x,y)){
+    if(prev_state[x][y]!=Model.get_state(x,y)){
       draw_xy(x, y);
     }
-    this.prev_state[x][y] = Model.get_state(x,y);
+    prev_state[x][y] = Model.get_state(x,y);
     */
   }
 
@@ -160,10 +156,10 @@
     }
 
     for(var i=0; i<xs.length; ++i){
-      if(this.prev_state[xs[i]][ys[i]]!=Model.get_state(xs[i], ys[i])){
+      if(prev_state[xs[i]][ys[i]]!=Model.get_state(xs[i], ys[i])){
         draw_xy(xs[i], ys[i]);
       }
-      this.prev_state[xs[i]][ys[i]] = Model.get_state(xs[i], ys[i]);
+      prev_state[xs[i]][ys[i]] = Model.get_state(xs[i], ys[i]);
     }
   }
 
@@ -178,15 +174,15 @@
     }
 
     for(var i=0; i<xs.length; ++i){
-      if(this.prev_state[xs[i]][ys[i]]!=Model.get_state(xs[i], ys[i])){
+      if(prev_state[xs[i]][ys[i]]!=Model.get_state(xs[i], ys[i])){
         draw_xy(xs[i], ys[i]);
       }
-      this.prev_state[xs[i]][ys[i]] = Model.get_state(xs[i], ys[i]);
+      prev_state[xs[i]][ys[i]] = Model.get_state(xs[i], ys[i]);
     }
   }
 
   function update(){
-    //console.log(Update);
+    console.log(Update);
     if(Update == "Local"){
       local_update();
     }else if(Update == "Wolff"){
@@ -194,6 +190,7 @@
     }else if(Update == "Event-chain"){
       Event_chain_update();
     }
+    redraw_all();
     window.requestAnimationFrame(update);
   }
 
