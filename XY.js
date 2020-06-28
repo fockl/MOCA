@@ -140,15 +140,119 @@ class XY{
     return {xs:xs, ys:ys};
   }
 
+  calc_dtheta_Event_chain(pos_theta){
+    var pos_theta_init = pos_theta;
+    if(pos_theta<0.0){
+      pos_theta += 360.0;
+    }else if(pos_theta>=360.0){
+      pos_theta -= 360.0;
+    }
+    var dE = -Math.log(1.0-Math.random())/this.beta;
+    var dE_init = dE;
+    var dtheta = 0.0;
+    if(this.J<0.0){
+      if(pos_theta<=180.0){
+        if(dE>= -this.J*(1.0+Math.cos(pos_theta*Math.PI/180.0))){
+          dE -= -this.J*(1.0+Math.cos(pos_theta*Math.PI/180.0));
+          dtheta += 360.0-pos_theta;
+          pos_theta = 0.0;
+        }else{
+          dtheta += -pos_theta;
+          dE += -this.J*(1.0-Math.cos(pos_theta*Math.PI/180.0));
+          pos_theta = 0.0;
+        }
+      }else{
+        dtheta += 360.0-pos_theta;
+        pos_theta = 0.0;
+      }
+      var shift = Math.floor(dE/(2.0*(-this.J)));
+      dE -= shift*2.0*(-this.J);
+      dtheta += 360.0*shift;
+
+      var tmp = Math.acos(1.0-dE/(-this.J))*180.0/Math.PI - pos_theta;
+
+      dtheta += tmp;
+
+      /*
+      if(dtheta<0.0){
+        console.log(dtheta, pos_theta_init, this.J, dE_init);
+      }
+      */
+
+      return dtheta;
+    }else{
+      if(pos_theta>=180.0){
+        if(dE>= this.J*(1.0-Math.cos(pos_theta*Math.PI/180.0))){
+          dE -=  this.J*(1.0-Math.cos(pos_theta*Math.PI/180.0));
+          dtheta += 360.0-pos_theta;
+          dtheta += 180.0;
+          pos_theta = 180.0;
+        }else{
+          dtheta += (180.0-pos_theta);
+          dE +=  this.J*(1.0+Math.cos(pos_theta*Math.PI/180.0));
+          pos_theta = 180.0;
+        }
+      }else{
+        dtheta += 180.0-pos_theta;
+        pos_theta = 180.0;
+      }
+      var shift = Math.floor(dE/(2.0*this.J));
+      dE -= shift*2.0*this.J;
+      dtheta += 360.0*shift;
+
+      var tmp = (360.0-Math.acos(1.0+dE/this.J)*180.0/Math.PI) - pos_theta;
+
+      dtheta += tmp;
+
+      return dtheta;
+    }
+  }
+
   Event_chain_update(){
-    right = this.state[(this.target_x+1)%this.L][this.target_y];
-    left = this.state[(this.target_x-1+this.L)%this.L][this.target_y];
-    up = this.state[this.target_x][(this.target_y+1)%this.L];
-    down = this.state[this.target_x][(this.target_y-1+this.L)%this.L];
+    var pos_x = this.target_x;
+    var pos_y = this.target_y;
+    var pos_state = this.state[pos_x][pos_y];
+    var right = this.calc_dtheta_Event_chain(pos_state-this.state[(pos_x+1)%this.L][pos_y]);
+    var left = this.calc_dtheta_Event_chain(pos_state-this.state[(pos_x-1+this.L)%this.L][pos_y]);
+    var up = this.calc_dtheta_Event_chain(pos_state-this.state[pos_x][(pos_y+1)%this.L]);
+    var down = this.calc_dtheta_Event_chain(pos_state-this.state[pos_x][(pos_y-1+this.L)%this.L]);
 
+    var dtheta = right;
+    var next_x = (pos_x+1)%this.L;
+    var next_y = pos_y;
+    if(left<dtheta){
+      dtheta = left;
+      next_x = (pos_x-1+this.L)%this.L;
+      next_y = pos_y;
+    }
+    if(up<dtheta){
+      dtheta = up;
+      next_x = pos_x;
+      next_y = (pos_y+1)%this.L;
+    }
+    if(down<dtheta){
+      dtheta = down;
+      next_x = pos_x;
+      next_y = (pos_y-1+this.L)%this.L;
+    }
 
+    //console.log(right, left, up, down, dtheta);
 
-    return {x:this.target_x, y:this.target_y};
+    this.state[pos_x][pos_y] += dtheta;
+    this.target_x = next_x;
+    this.target_y = next_y;
+
+    if(this.state[pos_x][pos_y]<0.0){
+      this.state[pos_x][pos_y] = -this.state[pos_x][pos_y];
+      var shift = Math.floor(this.state[pos_x][pos_y]/360.0);
+      this.state[pos_x][pos_y] -= 360.0*(shift+1);
+      this.state[pos_x][pos_y] = -this.state[pos_x][pos_y];
+    }else{
+      var shift = Math.floor(this.state[pos_x][pos_y]/360.0);
+      this.state[pos_x][pos_y] -= 360.0*shift;
+    }
+
+    return {x:pos_x, y:pos_y};
   }
 }
 

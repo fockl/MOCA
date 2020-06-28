@@ -134,6 +134,10 @@ class Ising{
 
     return {xs:xs, ys:ys};
   }
+
+  Event_chain_update(){
+    return {x:this.target_x, y:this.target_y};
+  }
 }
 
 
