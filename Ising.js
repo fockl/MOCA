@@ -138,6 +138,28 @@ class Ising{
   Event_chain_update(){
     return {x:this.target_x, y:this.target_y};
   }
+
+  calc_energy(){
+    var e = 0.0;
+    for(var x=0; x<this.L; ++x){
+      for(var y=0; y<this.L; ++y){
+        e += this.J*this.state[x][y]*this.state[(x+1)%this.L][y];
+        e += this.J*this.state[x][y]*this.state[x][(y+1)%this.L];
+      }
+    }
+    return e/this.L/this.L;
+  }
+
+  calc_magnet(){
+    var p = 0.0;
+    for(var x=0; x<this.L; ++x){
+      for(var y=0; y<this.L; ++y){
+        p += this.state[x][y];
+      }
+    }
+    p = p/this.L/this.L;
+    return Math.abs(p);
+  }
 }
 
 

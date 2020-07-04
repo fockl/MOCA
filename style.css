@@ -7,6 +7,20 @@ canvas{
   top: 150px;
   left: 250px;
 }
+.show-energy{
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  top: 150px;
+  left: 600px;
+}
+.show-magnet{
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  top: 150px;
+  left: 950px;
+}
 
 .spin{
 }
@@ -28,4 +42,40 @@ canvas{
   width:15px;
   height:20px;
   display:block;
+}
+
+h2{
+}
+.show-energy_h2{
+  position: absolute;
+  top: 50px;
+  left: 600px;
+}
+.show-magnet_h2{
+  position: absolute;
+  top: 50px;
+  left: 950px;
+}
+
+h3{
+}
+.show-energy2{
+  position: absolute;
+  top: 125px;
+  left: 575px;
+}
+.show-energy-2{
+  position: absolute;
+  top: 425px;
+  left: 575px;
+}
+.show-magnet1{
+  position: absolute;
+  top: 125px;
+  left: 925px;
+}
+.show-magnet0{
+  position: absolute;
+  top: 425px;
+  left: 925px;
 }

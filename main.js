@@ -6,6 +6,9 @@
   var arrow_flag = true;
   var prev_state;
 
+  var energy_array = [];
+  var magnet_array = [];
+
   var requestAnimationFrame = window.requestAnimationFrame || 
 　　　　　　　　　　　　　　　　　window.mozRequestAnimationFrame ||
                             　window.webkitRequestAnimationFrame || 
@@ -72,6 +75,54 @@
     ctx.fill();
   }
 
+  function draw_energy_and_magnet(){
+    var show1 = document.getElementById("show-energy");
+    var ctx1 = show1.getContext('2d');
+    var width1 = show1.width;
+    var height1 = show1.height;
+
+    ctx1.clearRect(0, 0, width1, height1);
+
+    ctx1.beginPath();
+    ctx1.strokeStyle = '#000';
+    ctx1.lineWidth = 2;
+    ctx1.rect(0, 0, width1, height1);
+    ctx1.closePath();
+    ctx1.stroke();
+
+    ctx1.beginPath();
+    ctx1.strokeStyle = "#f00";
+    ctx1.lineWidth = 2;
+    ctx1.moveTo(width1, (2.0-energy_array[0])/4.0*height1);
+    for(var i=1; i<energy_array.length; ++i){
+      ctx1.lineTo(width1-i/100*width1, (2.0-energy_array[i])/4.0*height1);
+    }
+    ctx1.stroke();
+
+    var show2 = document.getElementById("show-magnet");
+    var ctx2 = show2.getContext('2d');
+    var width2 = show2.width;
+    var height2 = show2.height;
+
+    ctx2.clearRect(0, 0, width2, height2);
+
+    ctx2.beginPath();
+    ctx2.strokeStyle = '#000';
+    ctx2.lineWidth = 2;
+    ctx2.rect(0, 0, width2, height2);
+    ctx2.closePath();
+    ctx2.stroke();
+
+    ctx2.beginPath();
+    ctx2.strokeStyle = "#00f";
+    ctx2.lineWidth = 2;
+    ctx2.moveTo(width2, (1.0-magnet_array[0])*height2);
+    for(var i=1; i<magnet_array.length; ++i){
+      ctx2.lineTo(width2-i/100*width2, (1.0-magnet_array[i])*height2);
+    }
+    ctx2.stroke();
+  }
+
   function redraw_all(){
     var show = document.getElementById("show-range");
     var ctx = show.getContext('2d');
@@ -112,6 +163,11 @@
     redraw_all();
     console.log(`set ${L}x${L} spins`);
 
+    energy_array = [Model.calc_energy()];
+    magnet_array = [Model.calc_magnet()];
+
+    draw_energy_and_magnet();
+
     return;
   }
 
@@ -120,6 +176,24 @@
     //Model = new XY(L,-1,0);
     Update = "Local";
     init_state();
+
+    var show1 = document.getElementById("show-energy");
+    var ctx1 = show1.getContext('2d');
+    ctx1.clearRect(0, 0, show1.width, show1.height);
+    ctx1.beginPath();
+    ctx1.fillStyle = '#000';
+    ctx1.rect(0, 0, show1.width, show1.height);
+    ctx1.closePath();
+    ctx1.stroke();
+
+    var show2 = document.getElementById("show-magnet");
+    var ctx2 = show2.getContext('2d');
+    ctx2.clearRect(0, 0, show2.width, show2.height);
+    ctx2.beginPath();
+    ctx2.fillStyle = '#000';
+    ctx2.rect(0, 0, show2.width, show2.height);
+    ctx2.closePath();
+    ctx2.stroke();
   }
 
   function local_update(){
@@ -192,6 +266,17 @@
     }
     redraw_all();
     window.requestAnimationFrame(update);
+
+    energy_array.unshift(Model.calc_energy());
+    magnet_array.unshift(Model.calc_magnet());
+
+    if(energy_array.length>101){
+      energy_array.pop();
+    }
+    if(magnet_array.length>101){
+      magnet_array.pop();
+    }
+    draw_energy_and_magnet();
   }
 
   init();

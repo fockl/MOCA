@@ -254,6 +254,31 @@ class XY{
 
     return {x:pos_x, y:pos_y};
   }
+
+  calc_energy(){
+    var e = 0.0;
+    for(var x=0; x<this.L; ++x){
+      for(var y=0; y<this.L; ++y){
+        e += this.J*Math.cos((this.state[x][y]-this.state[(x+1)%this.L][y])*Math.PI/180.0);
+        e += this.J*Math.cos((this.state[x][y]-this.state[x][(y+1)%this.L])*Math.PI/180.0);
+      }
+    }
+    return e/this.L/this.L;
+  }
+
+  calc_magnet(){
+    var px = 0.0;
+    var py = 0.0;
+    for(var x=0; x<this.L; ++x){
+      for(var y=0; y<this.L; ++y){
+        px += Math.cos(this.state[x][y]*Math.PI/180.0);
+        py += Math.sin(this.state[x][y]*Math.PI/180.0);
+      }
+    }
+    px = px/this.L/this.L;
+    py = py/this.L/this.L;
+    return Math.sqrt(px*px+py*py);
+  }
 }
 
 
