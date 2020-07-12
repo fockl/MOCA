@@ -56,14 +56,14 @@ You can manage some parameters.
   You can choose one of the following models :
 
   + Ising model:
-    $$
-    \mathcal{H} = - \sum_{ij} s_i s_j
-    $$
+    
+    <center><img src="https://latex.codecogs.com/gif.latex?\mathcal{H}&space;=&space;-&space;\sum_{\langle&space;ij&space;\rangle}&space;s_i&space;s_j" title="\mathcal{H} = - \sum_{\langle ij \rangle} s_i s_j" /></center>
+    
 
+    
   + XY model:
-    $$
-    \mathcal{H} = -\sum_{ij} cos(\theta_i - \theta_j)
-    $$
+    
+    <center><img src="https://latex.codecogs.com/gif.latex?\mathcal{H}&space;=&space;-&space;\sum_{\langle&space;ij&space;\rangle}&space;\cos(\theta_i&space;-&space;\theta_j)" title="\mathcal{H} = - \sum_{\langle ij \rangle} \cos(\theta_i - \theta_j)" /></center>
 
 + **Update**
   
