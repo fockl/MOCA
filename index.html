@@ -6,29 +6,40 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <h3>逆温度</h3>
+    <input type="radio" class="langChangeButton" name="langChangeButton" id="langJa" checked>
+    <label for="langJa" style="cursor:pointer">日本語</label>
+    <input type="radio" class="langChangeButton" name="langChangeButton" id="langEn">
+    <label for="langEn" style="cursor:pointer">English</label>
+
+    <h3 lang="ja">逆温度</h3>
+    <h3 lang="en">Inverse Temperature</h3>
     <input type="text" name="slider" id="slider1o" value="0">
     <div id="slider1" class="js-slider">
       <div></div>
       <input type="button" value="">
     </div>
-    <div> 高温---------------------------------------------低温 </div>
+    <div lang="ja"> 高温---------------------------------------------低温 </div>
+    <div lang="en"> High---------------------------------------------Low </div>
 
-    <h3>サイズ</h3>
+    <h3 lang="ja">サイズ</h3>
+    <h3 lang="en">Size</h3>
     <input type="text" name="size" id="sizeo" value="5">
     <div id="resizing"></div>
 
-    <h3>形</h3>
+    <h3 lang="ja">形</h3>
+    <h3 lang="en">Shape</h3>
     <div>
       <button id="arrow_change_button" class="button" type="button" style="cursor:pointer">Arrow</button>
       <button id="block_change_button" class="button" type="button" style="cursor:pointer">Block</button>
     </div>
-    <h3>模型</h3>
+    <h3 lang="ja">模型</h3>
+    <h3 lang="en">Model</h3>
     <div>
       <button id="Ising_button" class="button" type="button" style="cursor:pointer">Ising</button>
       <button id="XY_button" class="button" type="button" style="cursor:pointer">XY</button>
     </div>
-    <h3>更新</h3>
+    <h3 lang="ja">更新</h3>
+    <h3 lang="en">Update</h3>
     <div>
       <button id="local_update_button" class="button" type="button" style="cursor:pointer">Local</button>
       <button id="Wolff_update_button" class="button" type="button" style="cursor:pointer">Wolff</button>
@@ -36,16 +47,26 @@
     </div>
     <canvas class="show-range" id="show-range">
     </canvas>
-    <h2 class="show-energy_h2">エネルギー</h2>
+    <h2 class="show-energy_h2" lang="ja">エネルギー</h2>
+    <h2 class="show-energy_h2" lang="en">Energy</h2>
     <h3 class="show-energy2">2</h3>
     <h3 class="show-energy-2">-2</h3>
     <canvas class="show-energy" id="show-energy">
     </canvas>
-    <h2 class="show-magnet_h2">|磁化|</h2>
+    <h2 class="show-magnet_h2" lang="ja">|磁化|</h2>
+    <h2 class="show-magnet_h2" lang="en">|Magnetization|</h2>
     <h3 class="show-magnet1">1</h3>
     <h3 class="show-magnet0">0</h3>
     <canvas class="show-magnet" id="show-magnet">
     </canvas>
+    <!--
+    <h2 class="show-energy-cor_h2">相関関数</h2>
+    <canvas class="show-energy-cor" id="show-energy-cor">
+    </canvas>
+    <h2 class="show-magnet-cor_h2">相関関数</h2>
+    <canvas class="show-magnet-cor" id="show-magnet-cor">
+    </canvas>
+    -->
     <script src="./Ising.js"></script>
     <script src="./XY.js"></script>
     <script src="./main.js"></script>

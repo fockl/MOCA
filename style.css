@@ -1,24 +1,56 @@
+.langChangeButton{
+  display: none;
+}
+.langChangeButton:checked + label{
+  background-color: skyblue;
+}
+label{
+  display: inline-block;
+  border: 1px solid #000;
+  padding: 1px 1px;
+}
+#langJa:not(:checked) ~ :lang(ja){
+  display: none;
+}
+#langEn:not(:checked) ~ :lang(en){
+  display: none;
+}
+
 canvas{
 }
 .show-range{
   position: absolute;
   width: 300px;
   height: 300px;
-  top: 150px;
+  top: 200px;
   left: 250px;
 }
 .show-energy{
   position: absolute;
   width: 300px;
   height: 300px;
-  top: 150px;
+  top: 200px;
   left: 600px;
 }
 .show-magnet{
   position: absolute;
   width: 300px;
   height: 300px;
-  top: 150px;
+  top: 200px;
+  left: 950px;
+}
+.show-energy-cor{
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  top: 550px;
+  left: 600px;
+}
+.show-magnet-cor{
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  top: 550px;
   left: 950px;
 }
 
@@ -38,7 +70,7 @@ canvas{
   font-size:0px;
 }
 .js-slider input{
-  position:absolute;
+  position:relative;
   width:15px;
   height:20px;
   display:block;
@@ -48,12 +80,22 @@ h2{
 }
 .show-energy_h2{
   position: absolute;
-  top: 50px;
+  top: 150px;
   left: 600px;
 }
 .show-magnet_h2{
   position: absolute;
-  top: 50px;
+  top: 150px;
+  left: 950px;
+}
+.show-energy-cor_h2{
+  position: absolute;
+  top: 500px;
+  left: 600px;
+}
+.show-magnet-cor_h2{
+  position: absolute;
+  top: 500px;
   left: 950px;
 }
 
@@ -61,21 +103,21 @@ h3{
 }
 .show-energy2{
   position: absolute;
-  top: 125px;
+  top: 175px;
   left: 575px;
 }
 .show-energy-2{
   position: absolute;
-  top: 425px;
+  top: 475px;
   left: 575px;
 }
 .show-magnet1{
   position: absolute;
-  top: 125px;
+  top: 175px;
   left: 925px;
 }
 .show-magnet0{
   position: absolute;
-  top: 425px;
+  top: 475px;
   left: 925px;
 }

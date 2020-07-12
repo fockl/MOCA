@@ -6,8 +6,16 @@
   var arrow_flag = true;
   var prev_state;
 
+  var array_max = 101;
   var energy_array = [];
   var magnet_array = [];
+  var energy_cor_array = [];
+  var magnet_cor_array = [];
+  var cor_counter_array = [];
+  var energy_ave = 0.0;
+  var magnet_ave = 0.0;
+
+  var EPS = 1.0E-12;
 
   var requestAnimationFrame = window.requestAnimationFrame || 
 　　　　　　　　　　　　　　　　　window.mozRequestAnimationFrame ||
@@ -75,27 +83,34 @@
     ctx.fill();
   }
 
+  function show_edge_init(name){
+    var show = document.getElementById(name);
+    var ctx = show.getContext('2d');
+    ctx.clearRect(0, 0, show.width, show.height);
+    ctx.beginPath();
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.rect(0, 0, show.width, show.height);
+    ctx.closePath();
+    ctx.stroke();
+  }
+
   function draw_energy_and_magnet(){
+    var inv_array_max = 1.0/(array_max-1.0);
+
     var show1 = document.getElementById("show-energy");
     var ctx1 = show1.getContext('2d');
     var width1 = show1.width;
     var height1 = show1.height;
 
-    ctx1.clearRect(0, 0, width1, height1);
-
-    ctx1.beginPath();
-    ctx1.strokeStyle = '#000';
-    ctx1.lineWidth = 2;
-    ctx1.rect(0, 0, width1, height1);
-    ctx1.closePath();
-    ctx1.stroke();
+    show_edge_init("show-energy");
 
     ctx1.beginPath();
     ctx1.strokeStyle = "#f00";
     ctx1.lineWidth = 2;
     ctx1.moveTo(width1, (2.0-energy_array[0])/4.0*height1);
     for(var i=1; i<energy_array.length; ++i){
-      ctx1.lineTo(width1-i/100*width1, (2.0-energy_array[i])/4.0*height1);
+      ctx1.lineTo(width1-i*inv_array_max*width1, (2.0-energy_array[i])/4.0*height1);
     }
     ctx1.stroke();
 
@@ -104,21 +119,98 @@
     var width2 = show2.width;
     var height2 = show2.height;
 
-    ctx2.clearRect(0, 0, width2, height2);
-
-    ctx2.beginPath();
-    ctx2.strokeStyle = '#000';
-    ctx2.lineWidth = 2;
-    ctx2.rect(0, 0, width2, height2);
-    ctx2.closePath();
-    ctx2.stroke();
+    show_edge_init("show-magnet");
 
     ctx2.beginPath();
     ctx2.strokeStyle = "#00f";
     ctx2.lineWidth = 2;
     ctx2.moveTo(width2, (1.0-magnet_array[0])*height2);
     for(var i=1; i<magnet_array.length; ++i){
-      ctx2.lineTo(width2-i/100*width2, (1.0-magnet_array[i])*height2);
+      ctx2.lineTo(width2-i*inv_array_max*width2, (1.0-magnet_array[i])*height2);
+    }
+    ctx2.stroke();
+  }
+
+  function draw_cor_energy_and_magnet(){
+    var inv_array_max = 1.0/(array_max-1.0);
+
+    var show1 = document.getElementById("show-energy-cor");
+    var ctx1 = show1.getContext('2d');
+    var width1 = show1.width;
+    var height1 = show1.height;
+
+    //console.log(energy_sum*energy_sum);
+    if(cor_counter_array.length>0){
+      if(cor_counter_array[0]%100==0){
+        console.log(energy_cor_array[0], energy_cor_array[0]-energy_ave*energy_ave);
+        console.log(energy_cor_array);
+        console.log(magnet_cor_array[0], magnet_cor_array[0]-magnet_ave*magnet_ave);
+        console.log(magnet_cor_array);
+      }
+    }
+    //console.log(energy_cor_array);
+    //console.log(cor_counter_array);
+
+    //show_edge_init("show-energy-cor");
+
+    ctx1.beginPath();
+    ctx1.strokeStyle = "#f00";
+    ctx1.lineWidth = 2;
+    if(cor_counter_array.length>0){
+      var cor_energy_normalize = energy_cor_array[0]-energy_ave*energy_ave + EPS/cor_counter_array[0];
+      var inv_cor_energy_normalize = 1.0/cor_energy_normalize;
+      ctx1.moveTo(0, 0);
+      for(var i=1; i<energy_cor_array.length; ++i){
+        var cor_value = (energy_cor_array[i] - energy_ave*energy_ave)*inv_cor_energy_normalize;
+        if(cor_value<0.0){
+          cor_value=0.0;
+        }else if(cor_value>1.0){
+          cor_value=1.0;
+        }
+        ctx1.lineTo(i*inv_array_max*width1, (1-cor_value)*height1);
+
+        /*
+        cor_value = Math.log(cor_value + EPS)/3.0;
+        if(cor_value>0.0){
+          cor_value = 0.0;
+        }
+        ctx1.lineTo(i*inv_array_max*width1, -cor_value*height1);
+        */
+      }
+    }
+    ctx1.stroke();
+
+    var show2 = document.getElementById("show-magnet-cor");
+    var ctx2 = show2.getContext('2d');
+    var width2 = show2.width;
+    var height2 = show2.height;
+
+    show_edge_init("show-magnet-cor");
+
+    ctx2.beginPath();
+    ctx2.strokeStyle = "#00f";
+    ctx2.lineWidth = 2;
+    if(cor_counter_array.length>0){
+      var cor_magnet_normalize = magnet_cor_array[0]-magnet_ave*magnet_ave + EPS/cor_counter_array[0];
+      var inv_cor_magnet_normalize = 1.0/cor_magnet_normalize;
+      ctx2.moveTo(0, 0);
+      for(var i=1; i<magnet_cor_array.length; ++i){
+        var cor_value = (magnet_cor_array[i] - magnet_ave*magnet_ave)*inv_cor_magnet_normalize;
+        if(cor_value<0.0){
+          cor_value=0.0;
+        }else if(cor_value>1.0){
+          cor_value=1.0;
+        }
+        ctx2.lineTo(i*inv_array_max*width2, (1-cor_value)*height2);
+
+        /*
+        cor_value = Math.log(cor_value + EPS)/3.0;
+        if(cor_value>0.0){
+          cor_value = 0.0;
+        }
+        ctx2.lineTo(i*inv_array_max*width2, -cor_value*height2);
+        */
+      }
     }
     ctx2.stroke();
   }
@@ -163,13 +255,26 @@
     redraw_all();
     console.log(`set ${L}x${L} spins`);
 
-    energy_array = [Model.calc_energy()];
-    magnet_array = [Model.calc_magnet()];
+    var e = Model.calc_energy();
+    var m = Model.calc_magnet();
+
+    energy_array = [e];
+    magnet_array = [m];
+
+    energy_cor_array = [e*e];
+    magnet_cor_array = [m*m];
+
+    energy_ave = e;
+    magnet_ave = m;
+
+    cor_counter_array = [1];
 
     draw_energy_and_magnet();
+    //draw_cor_energy_and_magnet();
 
     return;
   }
+
 
   function init(){
     Model = new Ising(L,-1,0);
@@ -177,23 +282,19 @@
     Update = "Local";
     init_state();
 
-    var show1 = document.getElementById("show-energy");
-    var ctx1 = show1.getContext('2d');
-    ctx1.clearRect(0, 0, show1.width, show1.height);
-    ctx1.beginPath();
-    ctx1.fillStyle = '#000';
-    ctx1.rect(0, 0, show1.width, show1.height);
-    ctx1.closePath();
-    ctx1.stroke();
+    show_edge_init("show-energy");
+    show_edge_init("show-magnet");
+    //show_edge_init("show-energy-cor");
+    //show_edge_init("show-magnet-cor");
+  }
 
-    var show2 = document.getElementById("show-magnet");
-    var ctx2 = show2.getContext('2d');
-    ctx2.clearRect(0, 0, show2.width, show2.height);
-    ctx2.beginPath();
-    ctx2.fillStyle = '#000';
-    ctx2.rect(0, 0, show2.width, show2.height);
-    ctx2.closePath();
-    ctx2.stroke();
+  function cor_init(){
+    console.log("cor_init");
+    energy_cor_array = [];
+    magnet_cor_array = [];
+    cor_counter_array = []
+    energy_ave = 0.0;
+    magnet_ave = 0.0;
   }
 
   function local_update(){
@@ -256,7 +357,7 @@
   }
 
   function update(){
-    console.log(Update);
+    //console.log(Update);
     if(Update == "Local"){
       local_update();
     }else if(Update == "Wolff"){
@@ -267,16 +368,46 @@
     redraw_all();
     window.requestAnimationFrame(update);
 
-    energy_array.unshift(Model.calc_energy());
-    magnet_array.unshift(Model.calc_magnet());
+    var e = Model.calc_energy();
+    var m = Model.calc_magnet();
 
-    if(energy_array.length>101){
-      energy_array.pop();
+    energy_array.unshift(e);
+    magnet_array.unshift(m);
+
+    if(energy_array.length != magnet_array.length){
+      alert("energy_array.length != magnet_array.length");
     }
-    if(magnet_array.length>101){
+    if(energy_array.length>array_max){
+      energy_array.pop();
       magnet_array.pop();
     }
+
+    if(energy_cor_array.length != magnet_cor_array.length){
+      alert("energy_cor_array.length != magnet_cor_array.length");
+    }
+
+    if(cor_counter_array.length>0){
+      var coef = 1.0/(cor_counter_array[0]+1);
+
+      energy_ave = energy_ave*(1.0-coef) + e*coef;
+      magnet_ave = magnet_ave*(1.0-coef) + m*coef;
+
+      for(var i=0; i<energy_cor_array.length; ++i){
+        coef = 1.0/(cor_counter_array[i]+1);
+        energy_cor_array[i] = energy_cor_array[i]*(1.0-coef) + e*energy_array[i]*coef;
+        magnet_cor_array[i] = magnet_cor_array[i]*(1.0-coef) + m*magnet_array[i]*coef;
+        cor_counter_array[i] += 1;
+      }
+    }
+
+    if(energy_cor_array.length < energy_array.length){
+      energy_cor_array.push(e*energy_array[energy_cor_array.length]);
+      magnet_cor_array.push(m*magnet_array[magnet_cor_array.length]);
+      cor_counter_array.push(1);
+    }
+
     draw_energy_and_magnet();
+    //draw_cor_energy_and_magnet();
   }
 
   init();
@@ -322,6 +453,7 @@
     }else if(beta > 1.0){
       beta = 1.0;
     }
+    cor_init();
     Model.update_beta(beta);
   };
   set_value();
@@ -398,22 +530,27 @@
     delete Model;
     Model = new Ising(L,-1,beta);
     redraw_all();
+    cor_init();
   };
   document.getElementById("XY_button").onclick = function(e){
     delete Model;
     Model = new XY(L,-1,beta);
     redraw_all();
+    cor_init();
   };
   document.getElementById("local_update_button").onclick = function(e){
     delete Update;
     Update = "Local";
+    cor_init();
   };
   document.getElementById("Wolff_update_button").onclick = function(e){
     delete Update;
     Update = "Wolff";
+    cor_init();
   };
   document.getElementById("Event-chain_update_button").onclick = function(e){
     delete Update;
     Update = "Event-chain";
+    cor_init();
   };
 })();
