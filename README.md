@@ -10,6 +10,6 @@
 # MOCA
 Monte Carlo Simulator
 
-![Demo](https://user-images.githubusercontent.com/12505784/87226730-c097a900-c3d0-11ea-8a5d-02723954e0bf.gif)
+![result](https://user-images.githubusercontent.com/12505784/87247623-f3ed3d00-c48f-11ea-96a9-df5349320287.gif)
 
 page link: https://fockl.github.io/MOCA/index.html
