@@ -6,6 +6,11 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
+    <div>
+      <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-show-count="false" data-text="Monte Carlo Simulator:MOCA">Tweet</a>
+      <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+
     <input type="radio" class="langChangeButton" name="langChangeButton" id="langJa" checked>
     <label for="langJa" style="cursor:pointer">日本語</label>
     <input type="radio" class="langChangeButton" name="langChangeButton" id="langEn">
@@ -45,6 +50,7 @@
       <button id="Wolff_update_button" class="button" type="button" style="cursor:pointer">Wolff</button>
       <button id="Event-chain_update_button" class="button" type="button" style="cursor:pointer">Event-chain</button>
     </div>
+
     <canvas class="show-range" id="show-range">
     </canvas>
     <h2 class="show-energy_h2" lang="ja">エネルギー</h2>
@@ -67,6 +73,7 @@
     <canvas class="show-magnet-cor" id="show-magnet-cor">
     </canvas>
     -->
+
     <script src="./Ising.js"></script>
     <script src="./XY.js"></script>
     <script src="./main.js"></script>
