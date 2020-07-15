@@ -7,7 +7,10 @@
 label{
   display: inline-block;
   border: 1px solid #000;
-  padding: 1px 1px;
+  padding: 2px 2px;
+  width: 55px;
+  height: 25px;
+  text-align:center;
 }
 #langJa:not(:checked) ~ :lang(ja){
   display: none;
